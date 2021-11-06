@@ -5,63 +5,45 @@ using ll = long long;
 #define rep1(i, n) for (ll i = 1; i < n; i++)
 using P = pair<ll, ll>;
 
-void check(vector<vector<int>> deck, vector<int> soul)
+void check(vector<vector<int>> deck, vector<int> soul, int a)
 {
-    double sum = 0;
-    for (int i = 0; i < deck.size(); i++)
+    vector<int> score_list;
+    rep(i, deck.size())
     {
         if (deck[i].size() < soul.size())
             deck[i].push_back(100);
-        // if (i != 2)
-        //     continue;
-        // cout << i << endl;
         int d = 0;
         int s = 0;
         int count = 0;
         int score = 0;
         while (s < soul.size())
         {
-            // cout << deck[i][d] << " ";
-            // cout << count + soul[s] - 1 << endl;
             if (deck[i][d] <= count + soul[s] - 1)
             {
                 count = deck[i][d] + 1;
                 d++;
-                // cout << d << endl;
             }
             else
             {
                 count += soul[s];
                 score += soul[s];
+                if (score >= a)
+                    break;
             }
             s++;
         }
-        sum += score;
-        // cout << score << endl;
-        // for (int j = 0; j < deck[i].size(); j++)
-        // {
-        //     cout << "d" << deck[i][j];
-        // }
-        // cout << endl;
+        score_list.push_back(score);
     }
 
+    rep(i, score_list.size())
+    {
+        if (count(score_list.begin(), score_list.end(), i) == 0)
+            continue;
+        cout << i << "ダメージ: " << round((double)count(score_list.begin(), score_list.end(), i) / deck.size() * 100) << "%" << endl;
+    }
     cout << "ダメージ期待値:" << endl;
-    cout << sum / deck.size() << endl;
+    cout << round((double)accumulate(score_list.begin(), score_list.end(), 0) / deck.size() * 100) / 100 << endl;
 }
-
-// void make_deck(int sum, vector<vector<int>> &deck)
-// {
-//     for (int i = 0; i < sum - 2; i++)
-//         for (int j = i + 1; j < sum - 1; j++)
-//             for (int k = j + 1; k < sum; k++)
-//             {
-//                 vector<int> tmp;
-//                 tmp.push_back(i);
-//                 tmp.push_back(j);
-//                 tmp.push_back(k);
-//                 deck.push_back(tmp);
-//             }
-// }
 
 void recursive_comb(vector<vector<int>> &deck, vector<int> &indexes, int s, int rest)
 {
@@ -79,51 +61,47 @@ void recursive_comb(vector<vector<int>> &deck, vector<int> &indexes, int s, int 
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     int a, b, c;
-    // cin >> a >> b >> c;
     cout << "キャラ1のソウル:" << endl;
     cin >> a;
     cout << "キャラ2のソウル:" << endl;
     cin >> b;
     cout << "キャラ3のソウル:" << endl;
     cin >> c;
-    vector<int> soul;
-    soul.push_back(a);
-    soul.push_back(b);
-    soul.push_back(c);
-    // int sum = a + b + c;
     cout << "デッキ枚数" << endl;
     int sum;
     cin >> sum;
     int cx;
     cout << "残りCX: " << endl;
     cin >> cx;
+    int d = 100;
+    if (strcmp(argv[1], "dmg")==0)
+    {
+        cout << "与えたいダメージ" << endl;
+        cin >> d;
+    }
+
+    vector<int> soul = {a, b, c};
     vector<vector<int>> deck;
-    vector<int> indexes(cx);
     vector<int> chara = {0, 1, 2};
-    // cout << indexes.size() << endl;
+    vector<int> indexes(cx);
     recursive_comb(deck, indexes, sum - 1, cx);
     do
     {
-        vector<int> souls;
-        souls.push_back(soul[chara[0]]);
-        souls.push_back(soul[chara[1]]);
-        souls.push_back(soul[chara[2]]);
+        vector<int> souls = {soul[chara[0]], soul[chara[1]], soul[chara[2]]};
         cout << "---------------------------" << endl;
-        cout << "アタック順:" << endl;
-        cout << "キャラ" << chara[0]+1 << " → キャラ" << chara[1]+1 << " → キャラ" << chara[2]+1 << endl;
-        check(deck, souls);
+        if (argc == 1)
+        {
+            check(deck, souls, d);
+            break;
+        }
+        else
+        {
+            cout << "アタック順:" << endl;
+            cout << "キャラ" << chara[0] + 1 << " → キャラ" << chara[1] + 1 << " → キャラ" << chara[2] + 1 << endl;
+            check(deck, souls, d);
+        }
     } while (next_permutation(chara.begin(), chara.end()));
-
-    // rep(i, deck.size())
-    // {
-    //     rep(j, deck[i].size()) cout << deck[i][j];
-    //     cout << endl;
-    // }
-    // cout<<deck.size()<<endl;
-    // make_deck(sum, deck);
-    // check(deck, soul);
-    // cout << deck.size() << endl;
 }
